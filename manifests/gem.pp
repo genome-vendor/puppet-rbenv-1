@@ -89,11 +89,12 @@ define rbenv::gem(
     refreshonly => true,
   }~>
   exec { "rbenv-permissions-${gem}-${ruby_version}":
-    command     => "/bin/chown -R ${rbenv::owner}:${rbenv::group} \
+    command     => "chown -R ${rbenv::owner}:${rbenv::group} \
                   ${install_dir}/versions/${ruby_version}/lib/ruby/gems && \
-                  /bin/chmod -R g+w \
+                  chmod -R g+w \
                   ${install_dir}/versions/${ruby_version}/lib/ruby/gems",
     refreshonly => true,
+    path => [ '/bin/', '/sbin/', '/usr/bin/', '/usr/sbin/' ],
   }
 
   Exec {

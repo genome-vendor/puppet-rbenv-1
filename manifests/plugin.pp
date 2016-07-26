@@ -39,28 +39,31 @@ define rbenv::plugin(
 
   $plugin = split($name, '/') # divide plugin name into array
 
-  Exec { environment => $env }
+  Exec {
+    environment => $env,
+    path        => [ '/bin/', '/sbin/', '/usr/bin/', '/usr/sbin/', '/usr/local/bin/' ],
+  }
 
   exec { "install-${name}":
-    command => "/usr/bin/git clone https://github.com/${name}.git",
+    command => "git clone https://github.com/${name}.git",
     cwd     => "${install_dir}/plugins",
-    onlyif  => "/usr/bin/test -d ${install_dir}/plugins",
-    unless  => "/usr/bin/test -d ${install_dir}/plugins/${plugin[1]}",
+    onlyif  => "test -d ${install_dir}/plugins",
+    unless  => "test -d ${install_dir}/plugins/${plugin[1]}",
   }~>
   exec { "rbenv-permissions-${name}":
-    command     => "/bin/chown -R ${rbenv::owner}:${rbenv::group} \
+    command     => "chown -R ${rbenv::owner}:${rbenv::group} \
                     ${install_dir} && \
-                    /bin/chmod -R g+w ${install_dir}",
+                    chmod -R g+w ${install_dir}",
     refreshonly => true,
   }
 
   # run `git pull` on each run if we want to keep the plugin updated
   if $latest == true {
     exec { "update-${name}":
-      command => '/usr/bin/git pull',
+      command => 'git pull',
       cwd     => "${install_dir}/plugins/${plugin[1]}",
       user    => $rbenv::owner,
-      onlyif  => "/usr/bin/test -d ${install_dir}/plugins/${plugin[1]}",
+      onlyif  => "test -d ${install_dir}/plugins/${plugin[1]}",
     }
   }
 }
